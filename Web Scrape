@@ -1,0 +1,40 @@
+# Import the required libraries
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+# Step 1: Download the webpage
+url = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DA0321EN-SkillsNetwork/labs/datasets/Programming_Languages.html"
+response = requests.get(url)
+html_content = response.text
+
+# Step 2: Create a BeautifulSoup object
+soup = BeautifulSoup(html_content, "html.parser")
+
+# Step 3: Scrape Language names and Annual Average Salary
+# Assuming it's inside a table
+table = soup.find("table")  # find first table
+rows = table.find_all("tr")
+
+# Prepare data storage
+languages = []
+salaries = []
+
+# Loop through table rows, skip header row
+for row in rows[1:]:
+    cols = row.find_all("td")
+    language = cols[0].text.strip()
+    salary = cols[1].text.strip()
+    languages.append(language)
+    salaries.append(salary)
+
+# Step 4: Save the scraped data into a CSV file
+df = pd.DataFrame({
+    "Programming Language": languages,
+    "Average Annual Salary": salaries
+})
+
+df.to_csv("popular-languages.csv", index=False)
+
+# Confirmation message
+print("✅ Data scraped and saved to 'popular-languages.csv'")
