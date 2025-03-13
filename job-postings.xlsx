@@ -1,0 +1,41 @@
+import requests
+import pandas as pd
+
+# Load API data
+api_url = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DA0321EN-SkillsNetwork/labs/module%201/Accessing%20Data%20Using%20APIs/jobs.json"
+response = requests.get(api_url)
+data = response.json()
+
+# Reference list of technologies to search for
+all_technologies = [
+    "Python", "Java", "SQL", "C++", "JavaScript", "HTML", "CSS", "AWS", "Azure",
+    "R", "Scala", "Spark", "Tableau", "Power BI", "Hadoop", "Kubernetes", "Docker",
+    "Linux", "NoSQL", "MongoDB"
+]
+
+# Prepare dictionary to store counts
+technology_job_counts = {}
+
+# Loop through each technology and count occurrences in 'Key Skills'
+for tech in all_technologies:
+    tech_lower = tech.lower()
+    count = 0
+    for job in data:
+        key_skills = job.get('Key Skills', '').lower()
+        if tech_lower in key_skills:
+            count += 1
+    technology_job_counts[tech] = count
+
+# Convert results to a DataFrame
+df = pd.DataFrame(list(technology_job_counts.items()), columns=['Technology', 'Job Postings'])
+
+# Save DataFrame to Excel with a custom sheet name
+output_file = 'job-postings.xlsx'
+sheet_name = 'Key Skills Job Postings'
+
+# Use ExcelWriter to specify the sheet name
+with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
+    df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+# Confirmation message
+print(f"✅ Job postings by technology (based on Key Skills) written to Excel file: '{output_file}' in sheet: '{sheet_name}'")
